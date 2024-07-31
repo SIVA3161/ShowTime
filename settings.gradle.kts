@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ShowTime"
 include(":app")
+include(":network")
