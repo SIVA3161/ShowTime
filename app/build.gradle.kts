@@ -49,6 +49,9 @@ android {
 
 dependencies {
 
+    //modules
+    implementation(project(":network"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -68,10 +71,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //Image Loading
-    //Dependency Injection
+    //Dependency Injection : Koin
+    implementation(libs.koin.compose)
 
-    //modules
-    implementation(project(":network"))
 }
 
 composeCompiler {
