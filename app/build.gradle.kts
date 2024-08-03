@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler) // should be added for every module
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -22,6 +23,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"${project.properties["BASE_URL"]}\"")
+            buildConfigField("String", "ACCESS_TOKEN", "\"${project.properties["ACCESS_TOKEN"]}\"")
+            buildConfigField("String", "SECURE_API_KEY", "\"${project.properties["SECURE_API_KEY"]}\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -38,6 +45,7 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     packaging {
@@ -73,6 +81,10 @@ dependencies {
     //Image Loading
     //Dependency Injection : Koin
     implementation(libs.koin.compose)
+
+    //Navigation
+    implementation(libs.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 
 }
 
