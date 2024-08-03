@@ -1,4 +1,4 @@
-package com.sivag.network.sample.client
+package com.sivag.network.client
 
 import io.ktor.client.HttpClient
 

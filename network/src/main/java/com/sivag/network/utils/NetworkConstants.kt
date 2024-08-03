@@ -1,4 +1,4 @@
-package com.sivag.network.sample.utils
+package com.sivag.network.utils
 
 object NetworkConstants {
 

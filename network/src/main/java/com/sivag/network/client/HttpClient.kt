@@ -1,7 +1,7 @@
-package com.sivag.network.sample.client
+package com.sivag.network.client
 
 import android.util.Log
-import com.sivag.network.sample.utils.NetworkConstants
+import com.sivag.network.utils.NetworkConstants
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
@@ -45,7 +45,7 @@ val httpClientAndroid = HttpClient(Android) {
     install(Logging) {
         logger = object : Logger {
             override fun log(message: String) {
-                Log.v(NetworkConstants.Log.MODULE_NAME, message)
+                Log.i(NetworkConstants.Log.MODULE_NAME, message)
             }
         }
         level = LogLevel.ALL
@@ -53,7 +53,7 @@ val httpClientAndroid = HttpClient(Android) {
 
     install(ResponseObserver) {
         onResponse { response ->
-            Log.d("HTTP status:", "${response.status.value}")
+            Log.i(NetworkConstants.Log.MODULE_NAME, "${response.status.value}")
         }
     }
 
