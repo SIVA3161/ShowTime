@@ -28,6 +28,9 @@ android {
             buildConfigField("String", "BASE_URL", "\"${project.properties["BASE_URL"]}\"")
             buildConfigField("String", "ACCESS_TOKEN", "\"${project.properties["ACCESS_TOKEN"]}\"")
             buildConfigField("String", "SECURE_API_KEY", "\"${project.properties["SECURE_API_KEY"]}\"")
+            buildConfigField("String", "IMAGE_BASE_URL_SMALL", "\"${project.properties["IMAGE_BASE_URL_SMALL"]}\"")
+            buildConfigField("String", "IMAGE_BASE_URL_MEDIUM", "\"${project.properties["IMAGE_BASE_URL_MEDIUM"]}\"")
+            buildConfigField("String", "IMAGE_BASE_URL_ORIGINAL", "\"${project.properties["IMAGE_BASE_URL_ORIGINAL"]}\"")
         }
         release {
             isMinifyEnabled = false
@@ -69,6 +72,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.paging.compose.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -79,6 +83,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //Image Loading
+    implementation(libs.coil.compose)
     //Dependency Injection : Koin
     implementation(libs.koin.compose)
 
