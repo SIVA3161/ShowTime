@@ -4,9 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.sivag.showtime.ui.screens.DetailScreen
 import com.sivag.showtime.ui.screens.HomeScreen
+import com.sivag.showtime.viewmodel.MainViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -14,6 +15,7 @@ fun SetupNavHost(
     navController: NavHostController,
     startDestination: Route = Route.HomeScreen
 ) {
+    val mainViewModel : MainViewModel = koinViewModel()
 
     NavHost(
         navController = navController,
@@ -21,11 +23,11 @@ fun SetupNavHost(
     ){
 
         composable<Route.HomeScreen> {
-            HomeScreen(navController)
+            HomeScreen(navController, mainViewModel)
         }
 
-        composable<Route.DetailScreen> {
-            DetailScreen(it)
+        composable<Route.DetailScreen>() {
+            DetailScreen(navController, navBackStackEntry = it)
         }
     }
 }
