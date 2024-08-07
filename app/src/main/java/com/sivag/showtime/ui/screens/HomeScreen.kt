@@ -1,85 +1,160 @@
 package com.sivag.showtime.ui.screens
 
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.sivag.network.client.ApiOperation
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.sivag.showtime.data.model.domain.PopularMovie
 import com.sivag.showtime.data.model.domain.toPopularMovie
+import com.sivag.showtime.data.model.remote.RemoteMovie
 import com.sivag.showtime.navigation.Route
-import com.sivag.showtime.ui.components.ProgressLoader
+import com.sivag.showtime.ui.components.CustomMediumTopAppBar
+import com.sivag.showtime.ui.components.ExtendedFabButton
+import com.sivag.showtime.ui.components.MovieHCard
+import com.sivag.showtime.ui.components.MovieVCard
+import com.sivag.showtime.ui.components.WelcomeHeader
 import com.sivag.showtime.viewmodel.MainViewModel
 import kotlinx.serialization.json.Json
 
 @Composable
 fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
 
-    val movies by viewModel.movies.collectAsState()
+    var showSearchBar by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
 
-    Scaffold() { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+    val movies = viewModel.fetchPopularMovies().collectAsLazyPagingItems()
+    val mListState = rememberLazyListState()
+
+    Scaffold(
+        topBar = {
+            CustomMediumTopAppBar(navController = navController,
+                showSearchBar = showSearchBar,
+                searchText = searchText,
+                onSearchTextChanged = { searchText = it },
+                title = "Home",
+                isBack = false
+            )
+        },
+        floatingActionButton = {
+            ExtendedFabButton(listState = mListState){
+            showSearchBar = !showSearchBar
+                if (!showSearchBar) searchText = ""
+        } }
+    ) { innerPadding ->
+
+        Column {
+            PopularItem(navController = navController,
+                listState = mListState, innerPadding = innerPadding, movies = movies)
+        }
+    }
+}
+
+@Composable
+fun PopularItem(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    listState: LazyListState,
+    innerPadding: PaddingValues,
+    movies: LazyPagingItems<RemoteMovie.Result>
+) {
+    LazyColumn(
+        modifier = modifier
+            .padding(innerPadding),
+        state = listState,
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item { WelcomeHeader(name = "Siva") }
+        item {
+            Title(title = "Popular Movies")
+            PopularHSItem(
+                navController = navController,
+                movies = movies
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+            Title(title = "Search Movies")
+        }
+        items(
+            count =  movies.itemCount
         ) {
-            when (movies) {
-                is ApiOperation.Loading -> {
-                    ProgressLoader(isLoading = true)
+            // Display each movie
+            val movie: PopularMovie = movies[it]!!.toPopularMovie()
+
+            MovieHCard(popularMovie = movie) {
+                val jsonString = Json.encodeToString(
+                    PopularMovie.serializer(),
+                    it)
+                navController.navigate(Route.DetailScreen(jsonString))
+            }
+        }
+
+        // Handle loading state
+        movies.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    item { CircularProgressIndicator() }
                 }
-
-                is ApiOperation.Success -> {
-                    ProgressLoader(isLoading = false)
-
-                    //TODO starter purpose. start working on actual requirement
-                    val movieList = (movies as ApiOperation.Success).data
-                    LazyColumn {
-                        items(movieList.size) {
-                            movieList.forEach {
-                                Column(
-                                    Modifier
-                                        .height(20.dp)
-                                        .clickable {
-                                            val jsonString = Json.encodeToString(
-                                                PopularMovie.serializer(),
-                                                it.toPopularMovie()
-                                            )
-                                            navController.navigate(
-                                                Route.DetailScreen(
-                                                    jsonString
-                                                )
-                                            )
-                                        },
-                                ) {
-                                    Text(text = it.title)
-                                }
-                            }
-                        }
+                loadState.append is LoadState.Loading -> {
+                    item { CircularProgressIndicator() }
+                }
+                loadState.refresh is LoadState.Error -> {
+                    val e = movies.loadState.refresh as LoadState.Error
+                    item {
+                        Text(text = "Error: ${e.error.message}")
                     }
-
                 }
-
-                is ApiOperation.Failure -> {
-                    ProgressLoader(isLoading = false)
-                    Text(text = "Failed to fetch movies")
+                loadState.append is LoadState.Error -> {
+                    val e = movies.loadState.append as LoadState.Error
+                    item {
+                        Text(text = "Error: ${e.error.message}")
+                    }
                 }
+            }
+        }
+    }
+}
 
-                else -> {
-                    Text(text = "No data")
-                }
+/**
+ * Display each movie in a Horizontally Scrollable Item
+ * */
+
+@Composable
+fun PopularHSItem(navController: NavController,movies: LazyPagingItems<RemoteMovie.Result>) {
+    LazyRow() {
+        items(
+            count =  movies.itemCount
+        ) {
+            val movie: PopularMovie = movies[it]!!.toPopularMovie()
+
+            MovieVCard(popularMovie = movie) {
+                val jsonString = Json.encodeToString(
+                    PopularMovie.serializer(),
+                    movie)
+                navController.navigate(Route.DetailScreen(jsonString))
             }
         }
     }

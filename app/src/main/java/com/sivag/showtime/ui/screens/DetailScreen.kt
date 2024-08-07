@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.toRoute
+import com.sivag.showtime.BuildConfig
 import com.sivag.showtime.R
 import com.sivag.showtime.data.model.domain.PopularMovie
 import com.sivag.showtime.navigation.Route
@@ -76,7 +77,7 @@ fun DetailsView(innerPadding : PaddingValues, popularMovie: PopularMovie) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(346.dp),
-                    imageUrl = "https://image.tmdb.org/t/p/w500/${popularMovie.posterPath}",
+                    imageUrl = "${BuildConfig.IMAGE_BASE_URL_MEDIUM}${popularMovie.posterPath}",
                     alignment = Alignment.CenterStart,
                     contentScale = ContentScale.FillWidth
                 )
