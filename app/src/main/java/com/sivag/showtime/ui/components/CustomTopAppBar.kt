@@ -1,7 +1,6 @@
 package com.sivag.showtime.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -91,25 +90,26 @@ fun CustomMediumTopAppBar(
                         style = MaterialTheme.typography.headlineLarge,
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        if (searchText.isEmpty()) {
-                            Text(
-                                text = "Search Your favourite Movie Here",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(8.dp)
-                            )
+                    BasicTextField(
+                        value = searchText,
+                        onValueChange = onSearchTextChanged,
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        decorationBox = { innerTextField ->
+                            if (searchText.isEmpty()) {
+                                Text(
+                                    text = "Search Your favourite Movie Here",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                            innerTextField()
                         }
-                        BasicTextField(
-                            value = searchText,
-                            onValueChange = onSearchTextChanged,
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        )
-                    }
+                    )
                 }
             } else {
                 Text(

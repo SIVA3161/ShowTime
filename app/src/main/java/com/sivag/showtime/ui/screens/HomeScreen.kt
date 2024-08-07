@@ -58,15 +58,20 @@ fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
             )
         },
         floatingActionButton = {
-            ExtendedFabButton(listState = mListState){
-            showSearchBar = !showSearchBar
+            ExtendedFabButton(listState = mListState) {
+                showSearchBar = !showSearchBar
                 if (!showSearchBar) searchText = ""
-        } }
+            }
+        }
     ) { innerPadding ->
 
         Column {
-            PopularItem(navController = navController,
-                listState = mListState, innerPadding = innerPadding, movies = movies)
+            PopularItem(
+                navController = navController,
+                listState = mListState,
+                innerPadding = innerPadding,
+                movies = movies
+            )
         }
     }
 }
