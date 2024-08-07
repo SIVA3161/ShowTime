@@ -86,7 +86,7 @@ fun PopularItem(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item { WelcomeHeader(name = "Siva") }
+        item { WelcomeHeader(name = "User") }
         item {
             Title(title = "Popular Movies")
             PopularHSItem(

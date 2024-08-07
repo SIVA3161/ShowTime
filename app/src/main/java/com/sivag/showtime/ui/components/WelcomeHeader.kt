@@ -12,9 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.sivag.showtime.R
 
 @Composable
 fun WelcomeHeader(name: String) {
@@ -28,7 +30,7 @@ fun WelcomeHeader(name: String) {
                 text = "Hello $name,",
                 textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = colorResource(id = R.color.blue)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
