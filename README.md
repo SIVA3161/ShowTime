@@ -4,6 +4,9 @@ This is a Jetpack Compose app built using Material 3 that showcases popular movi
 designed with a modular architecture and leverages various modern Android development libraries
 and tools.
 
+## Branch Selection
+- 📢 Kindly navigate to 👉 **develop branch** to get the code.
+
 ## Tech Stack
 
 - Jetpack Compose [Compose Compiler Plugin Support]
