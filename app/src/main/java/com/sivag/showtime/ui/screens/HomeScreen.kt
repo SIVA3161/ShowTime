@@ -2,12 +2,13 @@ package com.sivag.showtime.ui.screens
 
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,12 +32,14 @@ import com.sivag.showtime.data.model.domain.PopularMovie
 import com.sivag.showtime.data.model.domain.toPopularMovie
 import com.sivag.showtime.data.model.remote.RemoteMovie
 import com.sivag.showtime.navigation.Route
-import com.sivag.showtime.ui.components.CustomMediumTopAppBar
+import com.sivag.showtime.ui.components.CustomTopAppBar
 import com.sivag.showtime.ui.components.ExtendedFabButton
 import com.sivag.showtime.ui.components.MovieHCard
 import com.sivag.showtime.ui.components.MovieVCard
+import com.sivag.showtime.ui.components.PullToRefreshLazyColumn
 import com.sivag.showtime.ui.components.WelcomeHeader
 import com.sivag.showtime.viewmodel.MainViewModel
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -49,10 +53,8 @@ fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
 
     Scaffold(
         topBar = {
-            CustomMediumTopAppBar(navController = navController,
-                showSearchBar = showSearchBar,
-                searchText = searchText,
-                onSearchTextChanged = { searchText = it },
+            CustomTopAppBar(
+                navController = navController,
                 title = "Home",
                 isBack = false
             )
@@ -65,14 +67,13 @@ fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
         }
     ) { innerPadding ->
 
-        Column {
-            PopularItem(
-                navController = navController,
-                listState = mListState,
-                innerPadding = innerPadding,
-                movies = movies
-            )
-        }
+        PopularItem(
+            navController = navController,
+            viewModel = viewModel,
+            listState = mListState,
+            innerPadding = innerPadding,
+            movies = movies
+        )
     }
 }
 
@@ -80,66 +81,79 @@ fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
 fun PopularItem(
     modifier: Modifier = Modifier,
     navController: NavController,
+    viewModel: MainViewModel,
     listState: LazyListState,
     innerPadding: PaddingValues,
     movies: LazyPagingItems<RemoteMovie.Result>
 ) {
-    LazyColumn(
-        modifier = modifier
-            .padding(innerPadding),
-        state = listState,
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    var isRefreshing by remember {
+        mutableStateOf(false)
+    }
+    val scope = rememberCoroutineScope()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        item { WelcomeHeader(name = "User") }
-        item {
-            Title(title = "Popular Movies")
-            PopularHSItem(
-                navController = navController,
-                movies = movies
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-            Title(title = "Search Movies")
-        }
-        items(
-            count =  movies.itemCount
-        ) {
-            // Display each movie
-            val movie: PopularMovie = movies[it]!!.toPopularMovie()
+        PullToRefreshLazyColumn(
+            items = movies.itemSnapshotList,
+            content = {
+                Column(
+                    modifier = modifier
+                        .padding(innerPadding),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    WelcomeHeader(name = "User")
+                    Title(title = "Popular Movies")
+                    PopularHSItem(
+                        navController = navController,
+                        movies = movies
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Title(title = "Search Movies")
+                    movies.itemSnapshotList.forEachIndexed { index, _ ->
+                        val movie: PopularMovie = movies[index]!!.toPopularMovie()
 
-            MovieHCard(popularMovie = movie) {
-                val jsonString = Json.encodeToString(
-                    PopularMovie.serializer(),
-                    it)
-                navController.navigate(Route.DetailScreen(jsonString))
-            }
-        }
+                        MovieHCard(popularMovie = movie) {
+                            val jsonString = Json.encodeToString(
+                                PopularMovie.serializer(),
+                                it)
+                            navController.navigate(Route.DetailScreen(jsonString))
+                        }
+                    }
 
-        // Handle loading state
-        movies.apply {
-            when {
-                loadState.refresh is LoadState.Loading -> {
-                    item { CircularProgressIndicator() }
-                }
-                loadState.append is LoadState.Loading -> {
-                    item { CircularProgressIndicator() }
-                }
-                loadState.refresh is LoadState.Error -> {
-                    val e = movies.loadState.refresh as LoadState.Error
-                    item {
-                        Text(text = "Error: ${e.error.message}")
+                    // Handle loading state
+                    movies.apply {
+                        when {
+                            loadState.refresh is LoadState.Loading -> {
+                                CircularProgressIndicator()
+                            }
+                            loadState.append is LoadState.Loading -> {
+                                CircularProgressIndicator()
+                            }
+                            loadState.refresh is LoadState.Error -> {
+                                val e = movies.loadState.refresh as LoadState.Error
+                                Text(text = "Error: ${e.error.message}")
+                            }
+                            loadState.append is LoadState.Error -> {
+                                val e = movies.loadState.append as LoadState.Error
+                                Text(text = "Error: ${e.error.message}")
+                            }
+                        }
                     }
                 }
-                loadState.append is LoadState.Error -> {
-                    val e = movies.loadState.append as LoadState.Error
-                    item {
-                        Text(text = "Error: ${e.error.message}")
-                    }
+            },
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                scope.launch {
+                    isRefreshing = true
+                    viewModel.fetchPopularMovies()
+                    isRefreshing = false
                 }
-            }
-        }
+            },
+            lazyListState = listState
+        )
     }
 }
 
