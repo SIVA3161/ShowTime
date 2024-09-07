@@ -23,6 +23,7 @@ and tools.
 - **Detail Page:** Displays detailed information about popular movies.
 - **Paging 3:** Implements efficient data loading and pagination.
 - **Pull to Refresh:** Allows users to refresh the movie list by pulling down.
+- **Search :** Allows users to search their favorite movie from the api
 
 ## Screenshots
 
@@ -35,7 +36,7 @@ and tools.
 - Android Studio Koala | 2024.1.1 or higher
 - Build #AI-241.15989.150.2411.11948838, built on June 11, 2024
 - Kotlin 2.0.0 
-- AGP 8.5.0 or higher
+- AGP 8.5.2 or higher
 
 ### Installation
 

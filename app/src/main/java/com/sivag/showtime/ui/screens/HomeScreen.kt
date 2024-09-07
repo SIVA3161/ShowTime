@@ -46,7 +46,6 @@ import kotlinx.serialization.json.Json
 fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
 
     var showSearchBar by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") }
 
     val movies = viewModel.fetchPopularMovies().collectAsLazyPagingItems()
     val mListState = rememberLazyListState()
@@ -62,7 +61,6 @@ fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
         floatingActionButton = {
             ExtendedFabButton(listState = mListState) {
                 showSearchBar = !showSearchBar
-                if (!showSearchBar) searchText = ""
             }
         }
     ) { innerPadding ->
@@ -72,8 +70,11 @@ fun HomeScreen(navController: NavController, viewModel: MainViewModel) {
             viewModel = viewModel,
             listState = mListState,
             innerPadding = innerPadding,
-            movies = movies
-        )
+            movies = movies,
+            showSearchBar = showSearchBar
+        ){
+            showSearchBar = false
+        }
     }
 }
 
@@ -84,7 +85,9 @@ fun PopularItem(
     viewModel: MainViewModel,
     listState: LazyListState,
     innerPadding: PaddingValues,
-    movies: LazyPagingItems<RemoteMovie.Result>
+    movies: LazyPagingItems<RemoteMovie.Result>,
+    showSearchBar: Boolean,
+    searchCloseClicked: () -> Unit
 ) {
     var isRefreshing by remember {
         mutableStateOf(false)
@@ -104,7 +107,7 @@ fun PopularItem(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    WelcomeHeader(name = "User")
+                    WelcomeHeader(name = "User",  showSearchBar = showSearchBar) { searchCloseClicked() }
                     Title(title = "Popular Movies")
                     PopularHSItem(
                         navController = navController,

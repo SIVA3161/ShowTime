@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.sivag.showtime.R
 
 @Composable
-fun WelcomeHeader(name: String) {
+fun WelcomeHeader(name: String, showSearchBar: Boolean, searchCloseClicked: () -> Unit) {
 
     Row(
         modifier = Modifier
@@ -38,9 +38,17 @@ fun WelcomeHeader(name: String) {
             Text(
                 text = "Get the popcorn, it’s showTime!",
                 textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            DockedSearchBar(state = showSearchBar) {
+                searchCloseClicked()
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
         }
     }
 }
@@ -50,6 +58,8 @@ fun WelcomeHeader(name: String) {
 @Composable
 private fun TopBarPreview() {
     Column {
-        WelcomeHeader("Sita")
+        WelcomeHeader("Sita", true) {
+
+        }
     }
 }
